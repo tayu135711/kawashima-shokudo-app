@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>川島食堂 | 管理者ダッシュボード</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/screens.css">
+</head>
+<body>
+  <div class="stub-page">
+    <header class="stub-header">
+      <div class="logo">川島食堂</div>
+      <div class="user-chip">
+        <span id="user-name"></span>
+        <button type="button" class="logout-btn" id="logout-btn">ログアウト</button>
+      </div>
+    </header>
+    <main class="stub-body">
+      <div class="stub-card">
+        <p class="stub-eyebrow">ADMIN</p>
+        <h1 class="stub-title">管理者ダッシュボード</h1>
+        <p class="stub-copy">全店舗・全注文の閲覧や、店舗承認機能をここに実装していきます。</p>
+      </div>
+    </main>
+  </div>
+  <script src="../js/session.js"></script>
+  <script>
+    const user = requireSession('admin');
+    if (user) {
+      document.getElementById('user-name').textContent = user.name + '（' + user.email + '）';
+    }
+    bindLogout('logout-btn');
+  </script>
+</body>
+</html>

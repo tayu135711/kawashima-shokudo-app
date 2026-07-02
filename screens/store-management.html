@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>川島食堂 | 店舗管理</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/screens.css">
+</head>
+<body>
+  <div class="stub-page">
+    <header class="stub-header">
+      <div class="logo">川島食堂</div>
+      <div class="user-chip">
+        <span id="user-name"></span>
+        <button type="button" class="logout-btn" id="logout-btn">ログアウト</button>
+      </div>
+    </header>
+    <main class="stub-body">
+      <div class="stub-card">
+        <p class="stub-eyebrow">STORE</p>
+        <h1 class="stub-title">店舗管理</h1>
+        <p class="stub-copy">メニューの登録・編集や、注文の受付管理をここで行えるようにしていきます。</p>
+      </div>
+    </main>
+  </div>
+  <script src="../js/session.js"></script>
+  <script>
+    const user = requireSession('store');
+    if (user) {
+      document.getElementById('user-name').textContent = user.name + '（' + user.email + '）';
+    }
+    bindLogout('logout-btn');
+  </script>
+</body>
+</html>

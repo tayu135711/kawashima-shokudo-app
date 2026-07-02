@@ -1,0 +1,248 @@
+:root {
+  --paper: #EDEFEA;
+  --paper-deep: #E3E6DE;
+  --sea: #1F4C5C;
+  --sea-deep: #16363F;
+  --crab: #C43E2E;
+  --crab-deep: #A83122;
+  --gold: #B8863B;
+  --ink: #23302E;
+  --ink-soft: #5C6660;
+  --line: #D8DCD3;
+  --white: #FFFFFF;
+  --font-display: 'Shippori Mincho', serif;
+  --font-body: 'Noto Sans JP', sans-serif;
+  --radius: 10px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--ink);
+  background: var(--paper);
+}
+
+.page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+/* ---------- 左：ブランドパネル ---------- */
+.brand-panel {
+  position: relative;
+  background: var(--sea);
+  color: var(--paper);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  text-align: center;
+  overflow: hidden;
+}
+
+.wave-texture {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.crab-scene {
+  position: relative;
+  width: 200px;
+  margin-bottom: 16px;
+}
+
+.crab-svg { width: 100%; height: auto; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .claw-left { animation: pinch-left 3.4s ease-in-out infinite; transform-origin: 84px 52px; }
+  .claw-right { animation: pinch-right 3.4s ease-in-out infinite; transform-origin: 136px 52px; }
+}
+
+@keyframes pinch-left {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-4deg); }
+}
+@keyframes pinch-right {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(4deg); }
+}
+
+.brand-title {
+  position: relative;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 38px;
+  margin: 4px 0 12px;
+  letter-spacing: 0.08em;
+  color: var(--paper);
+}
+
+.brand-copy {
+  position: relative;
+  font-size: 14px;
+  line-height: 1.9;
+  color: var(--paper);
+  opacity: 0.82;
+  max-width: 260px;
+}
+
+/* ---------- 右：フォームパネル ---------- */
+.form-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+}
+
+.form-card {
+  width: 100%;
+  max-width: 380px;
+}
+
+.role-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.role-tab {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 8px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--white);
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.role-tab:hover { border-color: var(--gold); }
+
+.role-tab.is-active {
+  background: var(--sea);
+  border-color: var(--sea);
+  color: var(--paper);
+}
+
+.role-tab:focus-visible,
+.mode-btn:focus-visible,
+.submit-btn:focus-visible,
+.link-btn:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.mode-switch {
+  display: flex;
+  gap: 24px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 24px;
+}
+
+.mode-btn {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  background: none;
+  border: none;
+  padding: 0 0 12px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.mode-btn.is-active {
+  color: var(--ink);
+  border-bottom-color: var(--crab);
+}
+
+.field {
+  margin-bottom: 18px;
+}
+
+.field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+}
+
+.field input {
+  width: 100%;
+  padding: 12px 14px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--white);
+  color: var(--ink);
+}
+
+.field input::placeholder { color: #A6ADA3; }
+
+.form-error {
+  background: #F6E4E0;
+  color: var(--crab-deep);
+  font-size: 13px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin: -4px 0 16px;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 14px;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--paper);
+  background: var(--crab);
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.submit-btn:hover { background: var(--crab-deep); }
+.submit-btn:active { transform: scale(0.99); }
+
+.switch-hint {
+  text-align: center;
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-top: 20px;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--gold);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ---------- レスポンシブ ---------- */
+@media (max-width: 860px) {
+  .page { grid-template-columns: 1fr; }
+  .brand-panel { padding: 32px 24px; }
+  .crab-scene { width: 140px; }
+  .brand-title { font-size: 28px; }
+  .form-panel { padding: 24px; }
+}

@@ -1,0 +1,76 @@
+.stub-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.stub-header {
+  background: var(--sea);
+  color: var(--paper);
+  padding: 20px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stub-header .logo {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.stub-header .user-chip {
+  font-size: 13px;
+  color: var(--paper);
+  opacity: 0.85;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logout-btn {
+  font-family: var(--font-body);
+  font-size: 12px;
+  background: transparent;
+  border: 1px solid rgba(237,239,234,0.4);
+  color: var(--paper);
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.logout-btn:hover { background: rgba(237,239,234,0.12); }
+
+.stub-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.stub-card {
+  max-width: 420px;
+}
+
+.stub-eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.stub-title {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  margin: 0 0 14px;
+}
+
+.stub-copy {
+  font-size: 14px;
+  line-height: 1.9;
+  color: var(--ink-soft);
+}
