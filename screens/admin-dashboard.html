@@ -10,29 +10,91 @@
 <link rel="stylesheet" href="../css/screens.css">
 </head>
 <body>
-  <div class="stub-page">
-    <header class="stub-header">
-      <div class="logo">川島食堂</div>
-      <div class="user-chip">
-        <span id="user-name"></span>
-        <button type="button" class="logout-btn" id="logout-btn">ログアウト</button>
-      </div>
+  <div class="app-shell">
+    <header class="app-header">
+      <h1>管理者ダッシュボード</h1>
+      <button type="button" class="logout-btn" id="logout-btn">ログアウト</button>
     </header>
-    <main class="stub-body">
-      <div class="stub-card">
-        <p class="stub-eyebrow">ADMIN</p>
-        <h1 class="stub-title">管理者ダッシュボード</h1>
-        <p class="stub-copy">全店舗・全注文の閲覧や、店舗承認機能をここに実装していきます。</p>
+    <main class="app-main">
+      <div class="stat-grid">
+        <div class="stat-card">
+          <p class="stat-label">稼働中の店舗</p>
+          <p class="stat-value" id="stat-stores"></p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-label">本日の注文数</p>
+          <p class="stat-value" id="stat-orders-today"></p>
+        </div>
       </div>
+
+      <p class="section-title">店舗の新規登録申請</p>
+      <div class="card-list" id="approval-list"></div>
+
+      <p class="section-title">進行中の注文（全店舗）</p>
+      <div class="card-list" id="order-list"></div>
     </main>
   </div>
   <script src="../js/session.js"></script>
+  <script src="../js/mock-data.js"></script>
   <script>
-    const user = requireSession('admin');
-    if (user) {
-      document.getElementById('user-name').textContent = user.name + '（' + user.email + '）';
-    }
+    requireSession('admin');
     bindLogout('logout-btn');
+
+    document.getElementById('stat-stores').textContent = STORES.length;
+
+    const today = new Date().toDateString();
+    document.getElementById('stat-orders-today').textContent =
+      getOrders().filter(o => new Date(o.createdAt).toDateString() === today).length;
+
+    // 店舗の新規登録申請（承認/却下フロー自体はUIのみのモック）
+    let pendingApplications = [
+      { id: 'a1', name: '磯辺食堂 分店', appliedAt: '7/12', desc: '海鮮丼専門' },
+    ];
+
+    function renderApprovals() {
+      const list = document.getElementById('approval-list');
+      if (pendingApplications.length === 0) {
+        list.innerHTML = '<p class="empty-note">現在、承認待ちの申請はありません。</p>';
+        return;
+      }
+      list.innerHTML = pendingApplications.map(a => `
+        <div class="card">
+          <p style="margin:0;font-size:12px;font-weight:500;color:var(--ink);">${a.name}</p>
+          <p style="margin:3px 0 8px;font-size:11px;color:var(--ink-soft);">申請日 ${a.appliedAt}・${a.desc}</p>
+          <div style="display:flex;gap:8px;">
+            <button type="button" class="btn-block btn-secondary btn-sm" data-approve="${a.id}">承認</button>
+            <button type="button" class="btn-block btn-outline btn-sm" data-reject="${a.id}">却下</button>
+          </div>
+        </div>
+      `).join('');
+      list.querySelectorAll('[data-approve]').forEach(b => b.addEventListener('click', () => {
+        pendingApplications = pendingApplications.filter(a => a.id !== b.dataset.approve);
+        renderApprovals();
+      }));
+      list.querySelectorAll('[data-reject]').forEach(b => b.addEventListener('click', () => {
+        pendingApplications = pendingApplications.filter(a => a.id !== b.dataset.reject);
+        renderApprovals();
+      }));
+    }
+
+    function renderOrders() {
+      const orders = getOrders().filter(o => !['delivered', 'cancelled', 'pending_payment'].includes(o.status)).slice(0, 8);
+      const list = document.getElementById('order-list');
+      if (orders.length === 0) {
+        list.innerHTML = '<p class="empty-note">現在、進行中の注文はありません。</p>';
+        return;
+      }
+      list.innerHTML = orders.map(o => `
+        <div class="card" style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:12px;color:var(--ink);">#${o.id.slice(-4)} ${o.storeName}</span>
+          <span class="badge ${statusBadgeClass(o.status)}">${STATUS_LABELS[o.status]}</span>
+        </div>
+      `).join('');
+    }
+
+    renderApprovals();
+    renderOrders();
+    setInterval(renderOrders, 3000);
   </script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>川島食堂 | 配達可能な注文</title>
+<title>川島食堂 | 配達中</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
@@ -12,13 +12,13 @@
 <body>
   <div class="app-shell">
     <header class="app-header">
-      <h1>配達可能な注文</h1>
+      <h1>配達中</h1>
       <button type="button" class="logout-btn" id="logout-btn">ログアウト</button>
     </header>
     <main class="app-main">
       <div class="pill-tabs">
-        <span class="pill-tab is-active">配達可能一覧</span>
-        <a class="pill-tab" href="courier-delivery.html">配達中</a>
+        <a class="pill-tab" href="courier-available.html">配達可能一覧</a>
+        <span class="pill-tab is-active">配達中</span>
       </div>
       <div class="card-list" id="order-list"></div>
     </main>
@@ -30,11 +30,11 @@
     bindLogout('logout-btn');
 
     function render() {
-      const orders = getOrders().filter(o => o.status === 'ready');
+      const orders = getOrders().filter(o => o.status === 'assigned' && o.courier === (user ? user.name : '配達員'));
       const list = document.getElementById('order-list');
 
       if (orders.length === 0) {
-        list.innerHTML = '<p class="empty-note">現在、配達可能な注文はありません。</p>';
+        list.innerHTML = '<p class="empty-note">現在、担当中の配達はありません。配達可能一覧から注文を選んでください。</p>';
         return;
       }
 
@@ -42,14 +42,14 @@
         <div class="card">
           <p style="margin:0;font-size:12px;font-weight:500;color:var(--ink);">${o.storeName} → ${o.customerName} 様</p>
           <p style="margin:5px 0 8px;font-size:11px;color:var(--ink-soft);">${o.items.map(i => i.name + ' ×' + i.qty).join('・')}・¥${o.total.toLocaleString()}</p>
-          <button type="button" class="btn-block btn-primary btn-sm" data-id="${o.id}">担当する</button>
+          <button type="button" class="btn-block btn-secondary btn-sm" data-id="${o.id}">配達完了にする</button>
         </div>
       `).join('');
 
       list.querySelectorAll('[data-id]').forEach(btn => {
         btn.addEventListener('click', () => {
-          assignCourier(btn.dataset.id, user ? user.name : '配達員');
-          window.location.href = 'courier-delivery.html';
+          updateOrderStatus(btn.dataset.id, 'delivered');
+          render();
         });
       });
     }

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>川島食堂 | カート</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/screens.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <button type="button" class="back-btn" id="back-btn" aria-label="戻る">←</button>
+      <h1>カート</h1>
+    </header>
+    <main class="app-main has-sticky-bar" id="cart-main"></main>
+    <div class="sticky-bar" id="checkout-bar">
+      <button type="button" class="btn-block btn-primary" id="checkout-btn">注文確定へ進む</button>
+    </div>
+  </div>
+  <script src="../js/session.js"></script>
+  <script src="../js/mock-data.js"></script>
+  <script>
+    requireSession('customer');
+    document.getElementById('back-btn').addEventListener('click', () => history.back());
+
+    let pickupMode = 'delivery'; // delivery | pickup
+
+    function render() {
+      const lines = cartLines();
+      const main = document.getElementById('cart-main');
+      const bar = document.getElementById('checkout-bar');
+
+      if (lines.length === 0) {
+        main.innerHTML = '<p class="empty-note">カートは空です。お店を選んでメニューを追加してください。</p>';
+        bar.hidden = true;
+        return;
+      }
+      bar.hidden = false;
+
+      const itemsHtml = lines.map(l => `
+        <div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+          <div>
+            <p style="margin:0;font-size:13px;font-weight:500;color:var(--ink);">${l.menu.name}</p>
+            <p style="margin:2px 0 0;font-size:12px;color:var(--gold);">¥${l.menu.price.toLocaleString()}</p>
+          </div>
+          <div class="qty-stepper">
+            <button type="button" data-action="dec" data-menu="${l.menuId}">－</button>
+            <span class="qty-value">${l.qty}</span>
+            <button type="button" data-action="inc" data-menu="${l.menuId}">＋</button>
+          </div>
+        </div>
+      `).join('');
+
+      main.innerHTML = `
+        <p class="section-title">注文内容</p>
+        <div class="card-list">${itemsHtml}</div>
+        <p class="section-title">受取方法</p>
+        <div class="choice-group">
+          <button type="button" class="choice-chip ${pickupMode === 'delivery' ? 'is-active' : ''}" data-mode="delivery">配達</button>
+          <button type="button" class="choice-chip ${pickupMode === 'pickup' ? 'is-active' : ''}" data-mode="pickup">店頭受取</button>
+        </div>
+        <p class="section-title">合計</p>
+        <div class="card" style="display:flex;justify-content:space-between;font-size:14px;font-weight:500;">
+          <span>合計金額</span><span>¥${cartTotal().toLocaleString()}</span>
+        </div>
+      `;
+
+      main.querySelectorAll('[data-action]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const cart = getCart();
+          const line = cart.items.find(i => i.menuId === btn.dataset.menu);
+          if (!line) return;
+          if (btn.dataset.action === 'inc') line.qty += 1;
+          else line.qty -= 1;
+          cart.items = cart.items.filter(i => i.qty > 0);
+          setCart(cart);
+          render();
+        });
+      });
+      main.querySelectorAll('[data-mode]').forEach(btn => {
+        btn.addEventListener('click', () => { pickupMode = btn.dataset.mode; render(); });
+      });
+    }
+
+    document.getElementById('checkout-btn').addEventListener('click', () => {
+      window.location.href = 'checkout.html';
+    });
+
+    render();
+  </script>
+</body>
+</html>

@@ -3,36 +3,84 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>川島食堂 | 店舗管理</title>
+<title>川島食堂 | 注文対応</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <link rel="stylesheet" href="../css/screens.css">
 </head>
 <body>
-  <div class="stub-page">
-    <header class="stub-header">
-      <div class="logo">川島食堂</div>
-      <div class="user-chip">
-        <span id="user-name"></span>
-        <button type="button" class="logout-btn" id="logout-btn">ログアウト</button>
-      </div>
+  <div class="app-shell">
+    <header class="app-header">
+      <h1>注文対応</h1>
+      <button type="button" class="logout-btn" id="logout-btn">ログアウト</button>
     </header>
-    <main class="stub-body">
-      <div class="stub-card">
-        <p class="stub-eyebrow">STORE</p>
-        <h1 class="stub-title">店舗管理</h1>
-        <p class="stub-copy">メニューの登録・編集や、注文の受付管理をここで行えるようにしていきます。</p>
+    <main class="app-main">
+      <p class="small-note" style="margin-bottom:10px;">かに定食 川島</p>
+      <div class="pill-tabs">
+        <span class="pill-tab is-active">注文対応</span>
+        <a class="pill-tab" href="store-management-menu.html">メニュー管理</a>
       </div>
+      <div class="card-list" id="order-list"></div>
     </main>
   </div>
   <script src="../js/session.js"></script>
+  <script src="../js/mock-data.js"></script>
   <script>
-    const user = requireSession('store');
-    if (user) {
-      document.getElementById('user-name').textContent = user.name + '（' + user.email + '）';
-    }
+    requireSession('store');
     bindLogout('logout-btn');
+
+    const STORE_ID = 's1';
+
+    const NEXT_ACTION = {
+      ordered:   { label: '受付する',       next: 'accepted' },
+      accepted:  { label: '調理を開始する', next: 'preparing' },
+      preparing: { label: '調理完了にする', next: 'ready' },
+    };
+
+    function render() {
+      const orders = getOrders().filter(o => o.storeId === STORE_ID && o.status !== 'pending_payment');
+      const list = document.getElementById('order-list');
+
+      if (orders.length === 0) {
+        list.innerHTML = '<p class="empty-note">現在、対応が必要な注文はありません。</p>';
+        return;
+      }
+
+      list.innerHTML = orders.map(o => {
+        const action = NEXT_ACTION[o.status];
+        let footer = '';
+        if (action) {
+          footer = `<button type="button" class="btn-block btn-sm ${o.status === 'ordered' ? 'btn-secondary' : 'btn-primary'}" data-id="${o.id}" data-next="${action.next}" style="margin-top:8px;">${action.label}</button>`;
+        } else if (o.status === 'ready') {
+          footer = `<p class="small-note" style="margin-top:6px;">配達員の到着待ちです。</p>`;
+        } else if (o.status === 'assigned') {
+          footer = `<p class="small-note" style="margin-top:6px;">配達中：${o.courier || '配達員'}</p>`;
+        } else if (o.status === 'cancelled') {
+          footer = `<p class="small-note" style="margin-top:6px;">この注文はキャンセルされました。</p>`;
+        }
+        return `
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;">
+              <p style="margin:0;font-size:12px;font-weight:500;color:var(--ink);">注文 #${o.id.slice(-4)}</p>
+              <span class="badge ${statusBadgeClass(o.status)}">${STATUS_LABELS[o.status]}</span>
+            </div>
+            <p style="margin:5px 0 0;font-size:11px;color:var(--ink-soft);">${o.items.map(i => i.name + ' ×' + i.qty).join('・')}・¥${o.total.toLocaleString()}</p>
+            ${footer}
+          </div>
+        `;
+      }).join('');
+
+      list.querySelectorAll('[data-next]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          updateOrderStatus(btn.dataset.id, btn.dataset.next);
+          render();
+        });
+      });
+    }
+
+    render();
+    setInterval(render, 3000);
   </script>
 </body>
 </html>
