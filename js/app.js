@@ -52,28 +52,51 @@ modeBtns.forEach(btn => {
   });
 });
 
-form.addEventListener('submit', (e) => {
+form.addEventListener('submit', async (e) => {
   e.preventDefault();
   formError.hidden = true;
 
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
+  const name = document.getElementById('name').value.trim();
 
   if (!email || !password || password.length < 8) {
     formError.textContent = 'メールアドレスと8文字以上のパスワードを入力してください。';
     formError.hidden = false;
     return;
   }
+  if (state.mode === 'register' && !name) {
+    formError.textContent = 'お名前を入力してください。';
+    formError.hidden = false;
+    return;
+  }
 
-  // TODO: バックエンド実装後、ここをfetch('/api/auth/login' or '/api/auth/register')に差し替える
-  const mockUser = {
-    email,
-    role: state.role,
-    name: state.mode === 'register' ? document.getElementById('name').value : email.split('@')[0],
-  };
-  sessionStorage.setItem('kawashima_user', JSON.stringify(mockUser));
+  submitBtn.disabled = true;
+  submitBtn.textContent = '通信中...';
 
-  window.location.href = ROLE_LABELS[state.role].dest;
+  try {
+    const path = state.mode === 'login' ? '/auth/login' : '/auth/register';
+    const body = state.mode === 'login'
+      ? { email, password }
+      : { name, email, password, role: state.role };
+
+    const data = await apiFetch(path, { method: 'POST', body, auth: false });
+
+    sessionStorage.setItem('kawashima_auth', JSON.stringify({
+      token: data.token,
+      userId: data.userId,
+      name: data.name,
+      role: data.role,
+    }));
+
+    window.location.href = ROLE_LABELS[data.role].dest;
+  } catch (err) {
+    formError.textContent = err.message;
+    formError.hidden = false;
+  } finally {
+    submitBtn.disabled = false;
+    render();
+  }
 });
 
 render();

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>川島食堂 | メニュー管理</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/screens.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <h1>メニュー管理</h1>
+      <button type="button" class="logout-btn" id="logout-btn">ログアウト</button>
+    </header>
+    <main class="app-main">
+      <p class="small-note" style="margin-bottom:10px;">かに定食 川島</p>
+      <div class="pill-tabs">
+        <a class="pill-tab" href="store-management.html">注文対応</a>
+        <span class="pill-tab is-active">メニュー管理</span>
+      </div>
+      <div class="pill-tabs" id="filter-tabs"></div>
+      <div class="card-list" id="menu-list"></div>
+      <button type="button" class="btn-block btn-outline" id="add-btn" style="margin-top:14px;">＋ メニューを追加</button>
+    </main>
+  </div>
+  <script src="../js/session.js"></script>
+  <script src="../js/mock-data.js"></script>
+  <script>
+    requireSession('store');
+    bindLogout('logout-btn');
+
+    const STORE_ID = 's1'; // ログイン中のstoreユーザーが管理する店舗（本実装ではアカウントに紐づく）
+    let filter = 'すべて';
+
+    function renderFilters() {
+      document.getElementById('filter-tabs').innerHTML = `
+        <button type="button" class="pill-tab ${filter === 'すべて' ? 'is-active' : ''}" data-f="すべて">すべて</button>
+        <button type="button" class="pill-tab ${filter === '公開中' ? 'is-active' : ''}" data-f="公開中">公開中</button>
+        <button type="button" class="pill-tab ${filter === '下書き' ? 'is-active' : ''}" data-f="下書き">下書き</button>
+      `;
+      document.querySelectorAll('#filter-tabs .pill-tab').forEach(b => {
+        b.addEventListener('click', () => { filter = b.dataset.f; renderFilters(); renderMenu(); });
+      });
+    }
+
+    function renderMenu() {
+      let items = MENUS[STORE_ID] || [];
+      if (filter === '公開中') items = items.filter(m => m.published);
+      if (filter === '下書き') items = items.filter(m => !m.published);
+
+      document.getElementById('menu-list').innerHTML = items.map(m => `
+        <div class="card menu-card ${m.published ? '' : 'is-draft'}">
+          <div class="thumb"></div>
+          <div class="body">
+            <p class="name">${m.name}</p>
+            <p class="price">${m.published ? '¥' + m.price.toLocaleString() + '・公開中' : '下書き'}</p>
+          </div>
+          <button type="button" class="icon-btn" data-toggle="${m.id}">${m.published ? '非公開' : '公開'}</button>
+          <button type="button" class="icon-btn" data-del="${m.id}">削除</button>
+        </div>
+      `).join('') || '<p class="empty-note">該当するメニューはありません。</p>';
+
+      document.querySelectorAll('[data-toggle]').forEach(b => {
+        b.addEventListener('click', () => {
+          const item = MENUS[STORE_ID].find(m => m.id === b.dataset.toggle);
+          item.published = !item.published;
+          renderMenu();
+        });
+      });
+      document.querySelectorAll('[data-del]').forEach(b => {
+        b.addEventListener('click', () => {
+          if (!confirm('このメニューを削除しますか？')) return;
+          MENUS[STORE_ID] = MENUS[STORE_ID].filter(m => m.id !== b.dataset.del);
+          renderMenu();
+        });
+      });
+    }
+
+    document.getElementById('add-btn').addEventListener('click', () => {
+      const name = prompt('メニュー名を入力してください');
+      if (!name) return;
+      const price = Number(prompt('価格（円）を入力してください', '1000')) || 0;
+      MENUS[STORE_ID].push({ id: 'm' + Date.now(), category: 'その他', name, price, published: false });
+      renderMenu();
+    });
+
+    renderFilters();
+    renderMenu();
+  </script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>川島食堂 | 店舗詳細</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/screens.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <button type="button" class="back-btn" id="back-btn" aria-label="戻る">←</button>
+      <h1 id="store-name">店舗詳細</h1>
+    </header>
+    <main class="app-main has-sticky-bar">
+      <div class="pill-tabs" id="category-tabs"></div>
+      <div class="card-list" id="menu-list"></div>
+    </main>
+    <div class="sticky-bar" id="cart-bar" hidden>
+      <a class="cart-summary" href="cart.html">
+        <span>カート <strong id="cart-count">0</strong>点</span>
+        <span id="cart-total">¥0</span>
+      </a>
+    </div>
+  </div>
+  <script src="../js/session.js"></script>
+  <script src="../js/mock-data.js"></script>
+  <script>
+    requireSession('customer');
+
+    const storeId = new URLSearchParams(location.search).get('store') || 's1';
+    const store = getStore(storeId);
+    const menu = MENUS[storeId] || [];
+
+    document.getElementById('store-name').textContent = store ? store.name : '店舗が見つかりません';
+    document.getElementById('back-btn').addEventListener('click', () => history.back());
+
+    let activeCategory = 'すべて';
+    const categories = ['すべて', ...new Set(menu.map(m => m.category))];
+
+    function renderTabs() {
+      document.getElementById('category-tabs').innerHTML = categories.map(c => `
+        <button type="button" class="pill-tab ${c === activeCategory ? 'is-active' : ''}" data-cat="${c}">${c}</button>
+      `).join('');
+      document.querySelectorAll('.pill-tab').forEach(btn => {
+        btn.addEventListener('click', () => { activeCategory = btn.dataset.cat; renderTabs(); renderMenu(); });
+      });
+    }
+
+    function renderMenu() {
+      const items = menu.filter(m => activeCategory === 'すべて' || m.category === activeCategory).filter(m => m.published);
+      document.getElementById('menu-list').innerHTML = items.map(m => `
+        <div class="card menu-card">
+          <div class="thumb"></div>
+          <div class="body">
+            <p class="name">${m.name}</p>
+            <p class="price">¥${m.price.toLocaleString()}</p>
+          </div>
+          <button type="button" class="add-btn" data-menu="${m.id}" aria-label="カートに追加">＋</button>
+        </div>
+      `).join('');
+      document.querySelectorAll('.add-btn').forEach(btn => {
+        btn.addEventListener('click', () => { addToCart(storeId, btn.dataset.menu); refreshCartBar(); });
+      });
+    }
+
+    function refreshCartBar() {
+      const count = cartCount();
+      const bar = document.getElementById('cart-bar');
+      bar.hidden = count === 0;
+      document.getElementById('cart-count').textContent = count;
+      document.getElementById('cart-total').textContent = '¥' + cartTotal().toLocaleString();
+    }
+
+    renderTabs();
+    renderMenu();
+    refreshCartBar();
+  </script>
+</body>
+</html>
