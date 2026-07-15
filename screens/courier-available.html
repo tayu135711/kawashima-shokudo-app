@@ -10,29 +10,52 @@
 <link rel="stylesheet" href="../css/screens.css">
 </head>
 <body>
-  <div class="stub-page">
-    <header class="stub-header">
-      <div class="logo">川島食堂</div>
-      <div class="user-chip">
-        <span id="user-name"></span>
-        <button type="button" class="logout-btn" id="logout-btn">ログアウト</button>
-      </div>
+  <div class="app-shell">
+    <header class="app-header">
+      <h1>配達可能な注文</h1>
+      <button type="button" class="logout-btn" id="logout-btn">ログアウト</button>
     </header>
-    <main class="stub-body">
-      <div class="stub-card">
-        <p class="stub-eyebrow">COURIER</p>
-        <h1 class="stub-title">配達可能な注文</h1>
-        <p class="stub-copy">配達待ちの注文一覧と、担当アサインの機能をここに実装していきます。</p>
+    <main class="app-main">
+      <div class="pill-tabs">
+        <span class="pill-tab is-active">配達可能一覧</span>
+        <a class="pill-tab" href="courier-delivery.html">配達中</a>
       </div>
+      <div class="card-list" id="order-list"></div>
     </main>
   </div>
   <script src="../js/session.js"></script>
+  <script src="../js/mock-data.js"></script>
   <script>
     const user = requireSession('courier');
-    if (user) {
-      document.getElementById('user-name').textContent = user.name + '（' + user.email + '）';
-    }
     bindLogout('logout-btn');
+
+    function render() {
+      const orders = getOrders().filter(o => o.status === 'ready');
+      const list = document.getElementById('order-list');
+
+      if (orders.length === 0) {
+        list.innerHTML = '<p class="empty-note">現在、配達可能な注文はありません。</p>';
+        return;
+      }
+
+      list.innerHTML = orders.map(o => `
+        <div class="card">
+          <p style="margin:0;font-size:12px;font-weight:500;color:var(--ink);">${o.storeName} → ${o.customerName} 様</p>
+          <p style="margin:5px 0 8px;font-size:11px;color:var(--ink-soft);">${o.items.map(i => i.name + ' ×' + i.qty).join('・')}・¥${o.total.toLocaleString()}</p>
+          <button type="button" class="btn-block btn-primary btn-sm" data-id="${o.id}">担当する</button>
+        </div>
+      `).join('');
+
+      list.querySelectorAll('[data-id]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          assignCourier(btn.dataset.id, user ? user.name : '配達員');
+          window.location.href = 'courier-delivery.html';
+        });
+      });
+    }
+
+    render();
+    setInterval(render, 3000);
   </script>
 </body>
 </html>

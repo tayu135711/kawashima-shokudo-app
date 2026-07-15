@@ -10,29 +10,45 @@
 <link rel="stylesheet" href="../css/screens.css">
 </head>
 <body>
-  <div class="stub-page">
-    <header class="stub-header">
-      <div class="logo">川島食堂</div>
-      <div class="user-chip">
-        <span id="user-name"></span>
-        <button type="button" class="logout-btn" id="logout-btn">ログアウト</button>
-      </div>
+  <div class="app-shell">
+    <header class="app-header">
+      <h1>川島食堂</h1>
+      <a href="order-history.html" class="logout-btn" style="text-decoration:none;">注文履歴</a>
+      <button type="button" class="logout-btn" id="logout-btn">ログアウト</button>
     </header>
-    <main class="stub-body">
-      <div class="stub-card">
-        <p class="stub-eyebrow">CUSTOMER</p>
-        <h1 class="stub-title">店舗一覧</h1>
-        <p class="stub-copy">この画面は次のステップで、実際の店舗データと連携して実装します。まずはログインの導線が正しくつながっているか確認しましょう。</p>
-      </div>
+    <main class="app-main">
+      <input type="text" class="search-input" id="search" placeholder="お店を検索">
+      <div class="card-list" id="store-list"></div>
     </main>
   </div>
   <script src="../js/session.js"></script>
+  <script src="../js/mock-data.js"></script>
   <script>
     const user = requireSession('customer');
-    if (user) {
-      document.getElementById('user-name').textContent = user.name + '（' + user.email + '）';
-    }
     bindLogout('logout-btn');
+
+    function render(query) {
+      const list = document.getElementById('store-list');
+      const filtered = STORES.filter(s => !query || s.name.includes(query));
+      if (filtered.length === 0) {
+        list.innerHTML = '<p class="empty-note">「' + query + '」に一致するお店が見つかりません。</p>';
+        return;
+      }
+      list.innerHTML = filtered.map(s => `
+        <a class="card-link" href="store-detail.html?store=${s.id}">
+          <div class="card store-card">
+            <div class="thumb accent-${s.accent}"></div>
+            <div class="body">
+              <p class="name">${s.name}</p>
+              <p class="meta">★${s.rating.toFixed(1)}・${s.eta}</p>
+            </div>
+          </div>
+        </a>
+      `).join('');
+    }
+
+    document.getElementById('search').addEventListener('input', e => render(e.target.value.trim()));
+    render('');
   </script>
 </body>
 </html>
